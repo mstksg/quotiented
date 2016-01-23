@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Data.Quotient
                      , Data.List.Quotient
+                     , Data.Tuple.Quotient
                      , Numeric.Quotient
   build-depends:       base >= 4.7 && < 5
                      , containers
