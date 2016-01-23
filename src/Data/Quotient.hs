@@ -15,8 +15,8 @@ import Data.Function
 newtype a :/ e = Q (EquivClass e a)
 
 instance Equiv e a => Eq (a :/ e) where
-    Q x == Q y = eqBy (Proxy :: Proxy e) (Proxy :: Proxy a) x y
-    Q x /= Q y = neqBy (Proxy :: Proxy e) (Proxy :: Proxy a) x y
+    Q x == Q y = eqBy (Proxy :: Proxy (a :/ e)) x y
+    Q x /= Q y = neqBy (Proxy :: Proxy (a :/ e)) x y
 
 instance (Show a, Equiv e a) => Show (a :/ e) where
     showsPrec p x = showParen (p > 10) $ showString "quotient "
@@ -97,26 +97,26 @@ class Equiv e a where
     toEquivClass :: Proxy e -> a -> EquivClass e a
     fromEquivClass :: Proxy e -> EquivClass e a -> a
 
-    eqBy  :: Proxy e -> Proxy a -> EquivClass e a -> EquivClass e a -> Bool
-    neqBy :: Proxy e -> Proxy a -> EquivClass e a -> EquivClass e a -> Bool
+    normalizeEquivClass :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a
+    normalizeEquivClass _ = id
+    eqBy  :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a -> Bool
+    neqBy :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a -> Bool
 
     default eqBy
         :: Eq (EquivClass e a)
-        => Proxy e
-        -> Proxy a
+        => Proxy (a :/ e)
         -> EquivClass e a
         -> EquivClass e a
         -> Bool
-    eqBy _ _ = (==)
+    eqBy _ = (==)
 
     default neqBy
         :: Eq (EquivClass e a)
-        => Proxy e
-        -> Proxy a
+        => Proxy (a :/ e)
         -> EquivClass e a
         -> EquivClass e a
         -> Bool
-    neqBy _ _ = (/=)
+    neqBy _ = (/=)
 
 quotient :: forall e a. Equiv e a => a -> a :/ e
 quotient = Q . toEquivClass (Proxy :: Proxy e)
@@ -127,11 +127,12 @@ getCanonical (Q c) = fromEquivClass (Proxy :: Proxy e) c
 getEquivClass :: a :/ e -> EquivClass e a
 getEquivClass (Q c) = c
 
-withEquivClass :: EquivClass e a -> a :/ e
-withEquivClass = Q
+withEquivClass :: forall e a. Equiv e a => EquivClass e a -> a :/ e
+withEquivClass = Q . normalizeEquivClass (Proxy :: Proxy (a :/ e))
 
-withEquivClass' :: forall e a. Equiv e a => EquivClass e a -> a :/ e
-withEquivClass' x = quotient (fromEquivClass (Proxy :: Proxy e) x :: a)
+unsafeWithEquivClass :: EquivClass e a -> a :/ e
+unsafeWithEquivClass = Q
+
 
 liftQ
     :: forall e a b. (Equiv e a, Equiv e b)
@@ -172,7 +173,7 @@ liftQClass
     => (EquivClass e a -> EquivClass f b)
     -> a :/ e
     -> b :/ f
-liftQClass f (Q x) = Q $ f x
+liftQClass f (Q x) = withEquivClass $ f x
 
 liftQClass2
     :: forall e f g a b c. (Equiv e a, Equiv f b, Equiv g c)
@@ -180,7 +181,7 @@ liftQClass2
     -> a :/ e
     -> b :/ f
     -> c :/ g
-liftQClass2 f (Q x) (Q y) = Q $ f x y
+liftQClass2 f (Q x) (Q y) = withEquivClass $ f x y
 
 liftQClass3
     :: forall e f g h a b c d. (Equiv e a, Equiv f b, Equiv g c, Equiv h d)
@@ -189,7 +190,7 @@ liftQClass3
     -> b :/ f
     -> c :/ g
     -> d :/ h
-liftQClass3 f (Q x) (Q y) (Q z) = Q $ f x y z
+liftQClass3 f (Q x) (Q y) (Q z) = withEquivClass $ f x y z
 
 liftQClass4
     :: forall e f g h j a b c d r. (Equiv e a, Equiv f b, Equiv g c, Equiv h d, Equiv j r)
@@ -199,5 +200,5 @@ liftQClass4
     -> c :/ g
     -> d :/ h
     -> r :/ j
-liftQClass4 f (Q x) (Q y) (Q z) (Q a) = Q $ f x y z a
+liftQClass4 f (Q x) (Q y) (Q z) (Q a) = withEquivClass $ f x y z a
 
