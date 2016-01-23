@@ -46,6 +46,47 @@ instance (Integral (EquivClass e a), Equiv e a) => Integral (a :/ e) where
                   in  (withEquivClass d, withEquivClass m)
     toInteger   = toInteger . getEquivClass
 
+instance (Fractional (EquivClass e a), Equiv e a) => Fractional (a :/ e) where
+    (/) = liftQClass2 (/)
+    recip = liftQClass recip
+    fromRational = withEquivClass . fromRational
+
+instance (RealFrac (EquivClass e a), Equiv e a) => RealFrac (a :/ e) where
+    properFraction x = let (n, d) = properFraction (getEquivClass x)
+                       in  (n, withEquivClass d)
+
+instance (Floating (EquivClass e a), Equiv e a) => Floating (a :/ e) where
+    pi = withEquivClass pi
+    exp = liftQClass exp
+    log = liftQClass log
+    sin = liftQClass sin
+    cos = liftQClass cos
+    asin = liftQClass asin
+    acos = liftQClass acos
+    atan = liftQClass atan
+    sinh = liftQClass sinh
+    cosh = liftQClass cosh
+    asinh = liftQClass asinh
+    acosh = liftQClass acosh
+    atanh = liftQClass atanh
+
+instance (RealFloat (EquivClass e a), Equiv e a) => RealFloat (a :/ e) where
+    floatRadix = floatRadix . getEquivClass
+    floatDigits = floatDigits . getEquivClass
+    floatRange = floatRange . getEquivClass
+    decodeFloat = decodeFloat . getEquivClass
+    encodeFloat i = withEquivClass . encodeFloat i
+    exponent = exponent . getEquivClass
+    significand = liftQClass significand
+    scaleFloat s = liftQClass (scaleFloat s)
+    isNaN = isNaN . getEquivClass
+    isInfinite = isInfinite . getEquivClass
+    isDenormalized = isDenormalized . getEquivClass
+    isNegativeZero = isNegativeZero . getEquivClass
+    isIEEE = isIEEE . getEquivClass
+    atan2 = liftQClass2 atan2
+
+
 
 class Equiv e a where
     type EquivClass e a
