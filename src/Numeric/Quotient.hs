@@ -5,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Numeric.Quotient where
 
@@ -57,7 +58,7 @@ instance Real (Natural2 :/ Diff) where
 
 instance Integral (Natural2 :/ Diff) where
     quotRem x y = let (d, m) = quotRem (getEquivClass x) (getEquivClass y)
-                  in  (withEquivClass d, withEquivClass m)
+                  in  (unsafeWithEquivClass d, unsafeWithEquivClass m)
     toInteger   = getEquivClass
 
 

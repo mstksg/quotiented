@@ -56,8 +56,11 @@ getCanonical (Q c) = fromEquivClass (Proxy :: Proxy e) c
 getEquivClass :: a :/ e -> EquivClass e a
 getEquivClass (Q c) = c
 
-withEquivClass :: EquivClass e a -> a :/ e
-withEquivClass = Q
+withEquivClass :: forall e a. Equiv e a => EquivClass e a -> a :/ e
+withEquivClass x = quotient (fromEquivClass (Proxy :: Proxy e) x :: a)
+
+unsafeWithEquivClass :: EquivClass e a -> a :/ e
+unsafeWithEquivClass = Q
 
 liftQ
     :: forall e a b. (Equiv e a, Equiv e b)
