@@ -37,29 +37,3 @@ instance Equiv Diff Natural2 where
         | n >= 0    = N2 (fromIntegral n) 0
         | otherwise = N2 0 (fromIntegral (negate n))
 
-instance Num (Natural2 :/ Diff) where
-    (+) = liftQClass2 (+)
-    (*) = liftQClass2 (*)
-    (-) = liftQClass2 (-)
-    negate = liftQClass negate
-    abs = liftQClass abs
-    signum = liftQClass signum
-    fromInteger = withEquivClass
-
-instance Enum (Natural2 :/ Diff) where
-    toEnum = fromIntegral
-    fromEnum = fromInteger . getEquivClass
-
-instance Ord (Natural2 :/ Diff) where
-    compare = comparing getEquivClass
-
-instance Real (Natural2 :/ Diff) where
-    toRational = toRational . getEquivClass
-
-instance Integral (Natural2 :/ Diff) where
-    quotRem x y = let (d, m) = quotRem (getEquivClass x) (getEquivClass y)
-                  in  (unsafeWithEquivClass d, unsafeWithEquivClass m)
-    toInteger   = getEquivClass
-
-
-

@@ -4,10 +4,12 @@
 {-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Data.Quotient where
 
 import Data.Proxy
+import Data.Ord
 import Data.Function
 
 newtype a :/ e = Q (EquivClass e a)
@@ -19,6 +21,31 @@ instance Equiv e a => Eq (a :/ e) where
 instance (Show a, Equiv e a) => Show (a :/ e) where
     showsPrec p x = showParen (p > 10) $ showString "quotient "
                                        . showsPrec 11 (getCanonical x)
+
+instance (Ord (EquivClass e a), Equiv e a) => Ord (a :/ e) where
+    compare = comparing getEquivClass
+
+instance (Num (EquivClass e a), Equiv e a) => Num (a :/ e) where
+    (+) = liftQClass2 (+)
+    (*) = liftQClass2 (*)
+    (-) = liftQClass2 (-)
+    negate = liftQClass negate
+    abs = liftQClass abs
+    signum = liftQClass signum
+    fromInteger = withEquivClass . fromInteger
+
+instance (Enum (EquivClass e a), Equiv e a) => Enum (a :/ e) where
+    toEnum = withEquivClass . toEnum
+    fromEnum = fromEnum . getEquivClass
+
+instance (Real (EquivClass e a), Equiv e a) => Real (a :/ e) where
+    toRational = toRational . getEquivClass
+
+instance (Integral (EquivClass e a), Equiv e a) => Integral (a :/ e) where
+    quotRem x y = let (d, m) = quotRem (getEquivClass x) (getEquivClass y)
+                  in  (withEquivClass d, withEquivClass m)
+    toInteger   = toInteger . getEquivClass
+
 
 class Equiv e a where
     type EquivClass e a
@@ -56,11 +83,11 @@ getCanonical (Q c) = fromEquivClass (Proxy :: Proxy e) c
 getEquivClass :: a :/ e -> EquivClass e a
 getEquivClass (Q c) = c
 
-withEquivClass :: forall e a. Equiv e a => EquivClass e a -> a :/ e
-withEquivClass x = quotient (fromEquivClass (Proxy :: Proxy e) x :: a)
+withEquivClass :: EquivClass e a -> a :/ e
+withEquivClass = Q
 
-unsafeWithEquivClass :: EquivClass e a -> a :/ e
-unsafeWithEquivClass = Q
+withEquivClass' :: forall e a. Equiv e a => EquivClass e a -> a :/ e
+withEquivClass' x = quotient (fromEquivClass (Proxy :: Proxy e) x :: a)
 
 liftQ
     :: forall e a b. (Equiv e a, Equiv e b)
