@@ -16,10 +16,9 @@ instance Equiv e a => Eq (a :/ e) where
     Q x == Q y = eqBy (Proxy :: Proxy e) (Proxy :: Proxy a) x y
     Q x /= Q y = neqBy (Proxy :: Proxy e) (Proxy :: Proxy a) x y
 
--- rudimentary
 instance (Show a, Equiv e a) => Show (a :/ e) where
-    showsPrec _ x = ("quotient " ++)
-                  . showsPrec 9 (getCanonical x)
+    showsPrec p x = showParen (p > 10) $ showString "quotient "
+                                       . showsPrec 11 (getCanonical x)
 
 class Equiv e a where
     type EquivClass e a
