@@ -22,11 +22,16 @@ instance (KnownNat m, Integral n) => Equiv (Mod m) n where
                    . fromIntegral
     fromEquivClass _ = fromInteger . getFinite
 
--- data Diff
+data Diff
 
--- instance Equiv Diff (Natural, Natural) where
---     type EquivClass Diff (a, a) = (Natural, Natural)
---     -- toEquivClass _ (x, y) = (x - y, 0)
---     -- fromEquivClass _ (x, y) = 
+data Natural2 = N2 Natural Natural
+    deriving (Show, Eq, Read)
+
+instance Equiv Diff Natural2 where
+    type EquivClass Diff Natural2 = Integer
+    toEquivClass _ (N2 x y) = fromIntegral x - fromIntegral y
+    fromEquivClass _ n
+        | n >= 0    = N2 (fromIntegral n) 0
+        | otherwise = N2 0 (fromIntegral n)
 
 
