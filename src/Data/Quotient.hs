@@ -122,6 +122,10 @@ class Equiv e a where
 quotient :: forall e a. Equiv e a => a -> a :/ e
 quotient = Q . toEquivClass (Proxy :: Proxy e)
 
+infixl 7 //
+(//) :: forall e a proxy. Equiv e a => a -> proxy e -> a :/ e
+x // e = quotient x
+
 getCanonical :: forall e a. Equiv e a => a :/ e -> a
 getCanonical (Q c) = fromEquivClass (Proxy :: Proxy e) c
 
