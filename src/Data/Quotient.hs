@@ -86,6 +86,9 @@ instance (RealFloat (EquivClass e a), Equiv e a) => RealFloat (a :/ e) where
     isIEEE = isIEEE . getEquivClass
     atan2 = liftQClass2 atan2
 
+instance (Monoid (EquivClass e a), Equiv e a) => Monoid (a :/ e) where
+    mempty = withEquivClass mempty
+    mappend = liftQClass2 mappend
 
 
 class Equiv e a where
