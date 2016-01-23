@@ -12,6 +12,7 @@ import Data.Proxy
 import Data.Ord
 import Data.Function
 
+infixl 7 :/
 newtype a :/ e = Q (EquivClass e a)
 
 instance Equiv e a => Eq (a :/ e) where
@@ -96,9 +97,9 @@ class Equiv e a where
 
     toEquivClass :: Proxy e -> a -> EquivClass e a
     fromEquivClass :: Proxy e -> EquivClass e a -> a
-
     normalizeEquivClass :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a
     normalizeEquivClass _ = id
+
     eqBy  :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a -> Bool
     neqBy :: Proxy (a :/ e) -> EquivClass e a -> EquivClass e a -> Bool
 
