@@ -53,8 +53,11 @@ quotient = Q . toEquivClass (Proxy :: Proxy e)
 getCanonical :: forall e a. Equiv e a => a :/ e -> a
 getCanonical (Q c) = fromEquivClass (Proxy :: Proxy e) c
 
-getEquivClass :: Proxy e -> a :/ e -> EquivClass e a
-getEquivClass _ (Q c) = c
+getEquivClass :: a :/ e -> EquivClass e a
+getEquivClass (Q c) = c
+
+withEquivClass :: EquivClass e a -> a :/ e
+withEquivClass = Q
 
 liftQ
     :: forall e a b. (Equiv e a, Equiv e b)
